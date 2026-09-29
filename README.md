@@ -26,3 +26,12 @@
 <td><img width="220" alt="image" src="https://github.com/user-attachments/assets/69240d07-c3dd-401e-8769-0dbacb70372d" /></td>
 </tr>
 </table>
+
+## Pertemuan 4
+
+<table>
+<tr>
+<td><img width="211" height="467" alt="image" src="https://github.com/user-attachments/assets/f630529d-eaa7-46a5-bda5-9bedc517a483" /></td>
+
+</tr>
+</table>
