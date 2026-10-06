@@ -13,6 +13,8 @@ import com.pemob.talithanovelia.ui.screen.DaftarProdukScreen
 import com.pemob.talithanovelia.ui.screen.DetailProductScreen
 import com.pemob.talithanovelia.ui.screen.HubungiKamiScreen
 import com.pemob.talithanovelia.ui.theme.JualanTheme
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.pemob.talithanovelia.viewmodel.ProductViewModel
 
 class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,6 +23,7 @@ class HomeActivity : ComponentActivity() {
         setContent {
             JualanTheme {
                 val navController = rememberNavController()
+                val productViewModel: ProductViewModel = viewModel()
 
                 NavHost(
                     navController = navController,
@@ -28,7 +31,7 @@ class HomeActivity : ComponentActivity() {
                 ) {
                     // Rute 1: halaman daftar produk
                     composable("daftar_produk") {
-                        DaftarProdukScreen(navController = navController)
+                        DaftarProdukScreen(navController = navController, viewModel = productViewModel)
                     }
 
                     // Rute 2: halaman detail produk (menerima productId)
@@ -43,7 +46,8 @@ class HomeActivity : ComponentActivity() {
                         val productId = backStackEntry.arguments?.getInt("productId") ?: 0
                         DetailProductScreen(
                             productId = productId,
-                            navController = navController
+                            navController = navController,
+                            viewModel = productViewModel
                         )
                     }
 

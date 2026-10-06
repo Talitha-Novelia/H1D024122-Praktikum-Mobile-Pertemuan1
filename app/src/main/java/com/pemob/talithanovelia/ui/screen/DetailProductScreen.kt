@@ -38,38 +38,61 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavController
-import com.pemob.talithanovelia.R
-import com.pemob.talithanovelia.data.dummy.DummyData
+import coil.compose.AsyncImage
 import com.pemob.talithanovelia.data.model.Product
-import kotlinx.coroutines.delay
+import com.pemob.talithanovelia.util.JualanConstants.BASE_URL
+import com.pemob.talithanovelia.viewmodel.ProductUiState
+import com.pemob.talithanovelia.viewmodel.ProductViewModel
 
 // Langkah D.1 & D.7 : function stateful (pengelola state)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailProductScreen(productId: Int, navController: NavController?) {
+fun DetailProductScreen(productId: Int, navController: NavController?, viewModel: ProductViewModel) {
     val context = LocalContext.current
-    var isLoading by remember { mutableStateOf(true) }
-    var product by remember { mutableStateOf<Product?>(null) }
+    val uiState by viewModel.uiState.collectAsState()
     var quantity by rememberSaveable { mutableStateOf(1) }
 
-    LaunchedEffect(productId) {
-        isLoading = true
-        delay(1000) // Simulasi loading server lambat
-        product = DummyData.products.find { it.id == productId }
-        isLoading = false
-    }
-
-    StatelessDetailProduct(
-        product = product,
-        isLoading = isLoading,
-        quantity = quantity,
-        onQuantityChange = { quantity = it },
-        onBackClick = { navController?.popBackStack() },
-        onAddToCartClick = {
-            Toast.makeText(context, "Dimasukkan: $quantity", Toast.LENGTH_SHORT).show()
+    when (val state = uiState) {
+        is ProductUiState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
         }
-    )
+        is ProductUiState.Error -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "Error: ${state.message}", color = MaterialTheme.colorScheme.error)
+            }
+        }
+        is ProductUiState.Success -> {
+            val product = state.products.find { it.id == productId }
+            if (product == null) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Produk tidak ditemukan.")
+                }
+            } else {
+                StatelessDetailProduct(
+                    product = product,
+                    quantity = quantity,
+                    onQuantityChange = { quantity = it },
+                    onBackClick = { navController?.popBackStack() },
+                    onAddToCartClick = {
+                        Toast.makeText(context, "Dibeli sebanyak $quantity", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+        }
+    }
 }
 
 // Langkah D.2 - D.6 : function stateless (hanya menampilkan UI)
@@ -77,7 +100,6 @@ fun DetailProductScreen(productId: Int, navController: NavController?) {
 @Composable
 fun StatelessDetailProduct(
     product: Product?,
-    isLoading: Boolean,
     quantity: Int,
     onQuantityChange: (Int) -> Unit,
     onBackClick: () -> Unit,
@@ -98,29 +120,31 @@ fun StatelessDetailProduct(
             )
         }
     ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else if (product != null) {
+        if (product != null) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.dummy_product),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(280.dp)
-                )
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    val imageModel: Any = if (product.img == "dummy_product") {
+                        com.pemob.talithanovelia.R.drawable.dummy_product
+                    } else {
+                        "${BASE_URL}img/${product.img}"
+                    }
+
+                    AsyncImage(
+                        model = imageModel,
+                        contentDescription = product.name,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(280.dp),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                    )
+                }
 
                 Column(modifier = Modifier.padding(all = 16.dp)) {
                     Text(

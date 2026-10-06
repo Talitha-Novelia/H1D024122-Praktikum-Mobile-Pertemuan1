@@ -54,13 +54,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavController
-import com.pemob.talithanovelia.R
-import com.pemob.talithanovelia.data.dummy.DummyData
+import coil.compose.AsyncImage
 import com.pemob.talithanovelia.data.model.Category
 import com.pemob.talithanovelia.data.model.Product
 import com.pemob.talithanovelia.ui.theme.JualanTheme
-import kotlinx.coroutines.delay
+import com.pemob.talithanovelia.util.JualanConstants.BASE_URL
+import com.pemob.talithanovelia.viewmodel.ProductUiState
+import com.pemob.talithanovelia.viewmodel.ProductViewModel
 
 @Composable
 fun ProductItemCard(product: Product, onClick: () -> Unit) {
@@ -73,13 +75,15 @@ fun ProductItemCard(product: Product, onClick: () -> Unit) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(all = 12.dp)) {
-            val imageRes = if (product.img == "dummy_product") R.drawable.dummy_product else R.drawable.dummy_product
+            Box {
+                val imageModel: Any = if (product.img == "dummy_product") {
+                    com.pemob.talithanovelia.R.drawable.dummy_product
+                } else {
+                    "${BASE_URL}img/${product.img}"
+                }
 
-            Box(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Image(
-                    painter = painterResource(id = imageRes),
+                AsyncImage(
+                    model = imageModel,
                     contentDescription = product.name,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -153,50 +157,58 @@ fun CategoryItem(category: Category, isSelected: Boolean, onClick: () -> Unit) {
 // Langkah C.1 - C.2 & C.10 : function stateful (pengelola state)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DaftarProdukScreen(navController: NavController? = null) {
-    var selectedCategoryId by rememberSaveable {
-        mutableStateOf(DummyData.categories.firstOrNull()?.id)
-    }
+fun DaftarProdukScreen(navController: NavController? = null, viewModel: ProductViewModel) {
+    var selectedCategoryId by rememberSaveable { mutableStateOf<Int?>(null) }
+    val uiState by viewModel.uiState.collectAsState()
     var searchQuery by rememberSaveable { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
-    var filteredProducts by remember { mutableStateOf(emptyList<Product>()) }
 
-    LaunchedEffect(selectedCategoryId, searchQuery) {
-        isLoading = true
-        delay(1000)
-
-        val filteredByCategory = if (selectedCategoryId != null) {
-            DummyData.products.filter { it.category_id == selectedCategoryId }
-        } else {
-            DummyData.products
-        }
-
-        filteredProducts = if (searchQuery.isBlank()) {
-            filteredByCategory
-        } else {
-            filteredByCategory.filter {
-                it.name.contains(searchQuery, ignoreCase = true)
+    when (val state = uiState) {
+        is ProductUiState.Loading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
         }
-
-        isLoading = false
-    }
-
-    StatelessDaftarProduct(
-        categories = DummyData.categories,
-        selectedCategoryId = selectedCategoryId,
-        onCategorySelected = { selectedCategoryId = it },
-        searchQuery = searchQuery,
-        onSearchQueryChange = { searchQuery = it },
-        isLoading = isLoading,
-        products = filteredProducts,
-        onProductClick = { product ->
-            navController?.navigate("detail/${product.id}")
-        },
-        onContactUsClick = {
-            navController?.navigate("hubungi_kami")
+        is ProductUiState.Error -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Error: ${state.message}", color = MaterialTheme.colorScheme.error)
+            }
         }
-    )
+        is ProductUiState.Success -> {
+            if (selectedCategoryId == null && state.categories.isNotEmpty()) {
+                selectedCategoryId = state.categories.first().id
+            }
+
+            val filteredByCategory = if (selectedCategoryId != null) {
+                state.products.filter { it.category_id == selectedCategoryId }
+            } else {
+                state.products
+            }
+
+            val filteredProducts = if (searchQuery.isBlank()) {
+                filteredByCategory
+            } else {
+                filteredByCategory.filter {
+                    it.name.contains(searchQuery, ignoreCase = true)
+                }
+            }
+
+            StatelessDaftarProduct(
+                categories = state.categories,
+                selectedCategoryId = selectedCategoryId,
+                onCategorySelected = { selectedCategoryId = it },
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                isLoading = false,
+                products = filteredProducts,
+                onProductClick = { product ->
+                    navController?.navigate("detail/${product.id}")
+                },
+                onContactUsClick = {
+                    navController?.navigate("hubungi_kami")
+                }
+            )
+        }
+    }
 }
 
 // Langkah C.3 - C.9 & F : function stateless (hanya menampilkan UI)
@@ -350,10 +362,10 @@ fun StatelessDaftarProduct(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun DaftarProdukScreenPreview() {
-    JualanTheme {
-        DaftarProdukScreen()
-    }
-}
+// @Preview(showBackground = true)
+// @Composable
+// fun DaftarProdukScreenPreview() {
+//     JualanTheme {
+//         DaftarProdukScreen()
+//     }
+// }
