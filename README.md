@@ -47,7 +47,7 @@ Pentingnya optimasi memori dan pengelolaan sumber daya saat menampilkan data dal
 <tr>
 <td><img width="220" alt="image" src="https://github.com/user-attachments/assets/f630529d-eaa7-46a5-bda5-9bedc517a483" /></td>
 <td><img width="220" alt="image" src="https://github.com/user-attachments/assets/9ecb5850-375d-43d6-a197-eafe6cde3edf" /></td>
-<td><img width="220" height="1600" alt="image" src="https://github.com/user-attachments/assets/a375bb15-5b49-47bd-80b7-56b04508bee4" /></td>
+<td><img width="220" alt="image" src="https://github.com/user-attachments/assets/a375bb15-5b49-47bd-80b7-56b04508bee4" /></td>
 </tr>
 </table>
 
