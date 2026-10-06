@@ -1,3 +1,8 @@
+Laporan Praktikum Pemrograman Mobile
+Nama  : Talitha Novelia Salsabila
+NIM   : H1D024122
+Shift : E
+
 ## Pertemuan 1
 
 <table>
@@ -32,6 +37,16 @@
 <table>
 <tr>
 <td><img width="211" height="467" alt="image" src="https://github.com/user-attachments/assets/f630529d-eaa7-46a5-bda5-9bedc517a483" /></td>
+<td><img width="738" height="1600" alt="image" src="https://github.com/user-attachments/assets/9ecb5850-375d-43d6-a197-eafe6cde3edf" /></td>
+<td><img width="738" height="1600" alt="image" src="https://github.com/user-attachments/assets/a375bb15-5b49-47bd-80b7-56b04508bee4" /></td>
+</tr>
+</table>
 
+## Pertemuan 5
+
+<table>
+<tr>
+<td><img width="738" height="1600" alt="image" src="https://github.com/user-attachments/assets/fabd1ed9-25f0-473b-8dca-5174e3dfa49b" /></td>
+<td><img width="738" height="1600" alt="image" src="https://github.com/user-attachments/assets/7cf465da-ffbf-4132-80ec-1b76d345bf1c" /></td>
 </tr>
 </table>
